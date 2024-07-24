@@ -1,0 +1,11 @@
+service: 'service:CKIPTaggerService'
+include:
+  - '*.py'
+models:
+  - tag: "ckiptagger:latest"
+    alias: "ckiptagger"
+python:
+  packages:
+    - tensorflow==2.15
+    - ckiptagger
+  lock_packages: false
