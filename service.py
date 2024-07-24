@@ -25,7 +25,7 @@ class CKIPTaggerService:
         """
         Returns
         -------
-        List[List[Tuple[str, str]]]
+        List[List[PosToken]]
             A list of lists of (word, pos) tuples for each input text.
         """
         ws_lists = self.ws_model(texts)
@@ -36,15 +36,19 @@ class CKIPTaggerService:
         return result
 
     @bentoml.api(batchable=True)
-    def ner(self, texts: List[str]) -> List[List[Tuple[int, int, str, str]]]:
+    def ner(self, texts: List[str]) -> List[List[Tuple[str, str, Tuple[int, int]]]]:
         """
         Returns
         -------
-        List[List[Tuple[int, int, str, str]]]
+        List[List[NerToken]]
             A list of named entities in the input texts. Each named entity is
-            represented as a tuple of (start, end, entity_type, entity_text).
+            represented as a tuple of (name, label, span).
         """
         ws_lists = self.ws_model(texts)
         pos_lists = self.pos_model(ws_lists)
         ner_lists = self.ner_model(ws_lists, pos_lists)
+        ner_lists = [
+            [[name, label, span] for *span, label, name in sent_ners]
+            for sent_ners in ner_lists
+        ]
         return ner_lists
